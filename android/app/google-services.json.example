@@ -1,0 +1,8 @@
+{
+  "project_info": {
+    "project_number": "YOUR_PROJECT_NUMBER",
+    "firebase_url": "your-project-url",
+    "project_id": "your-project-id",
+    "storage_bucket": "your-project.appspot.com"
+  }
+}
