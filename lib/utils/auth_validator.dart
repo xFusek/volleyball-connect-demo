@@ -49,8 +49,36 @@ class AuthValidator {
     required String password,
   }) {
     return validateFullName(fullName) ??
-           validateEmail(email) ??
-           validatePhone(phone) ??
-           validatePassword(password);
+        validateEmail(email) ??
+        validatePhone(phone) ??
+        validatePassword(password);
+  }
+
+  static String? validateResetEmail(String email) {
+    final normalizedEmail = email.trim();
+
+    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      return 'Please enter a valid email address.';
+    }
+
+    return null;
+  }
+
+  static String? validateLoginForm({
+    required String email,
+    required String password,
+  }) {
+    final normalizedEmail = email.trim();
+    final normalizedPassword = password.trim();
+
+    if (normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      return 'Please enter a valid email address.';
+    }
+
+    if (normalizedPassword.isEmpty) {
+      return 'Please enter your password.';
+    }
+
+    return null;
   }
 }

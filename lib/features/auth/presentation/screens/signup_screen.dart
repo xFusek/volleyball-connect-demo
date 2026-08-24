@@ -190,7 +190,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       isLoading: isGoogleLoading,
                       onPressed: _onGooglePressed,
                     ),
-                    Gap(12.h),
+                    Gap(6.h),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

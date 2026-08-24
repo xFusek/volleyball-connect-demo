@@ -17,6 +17,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthLogoutRequested>(_onAuthLogoutRequested);
     on<AuthGoogleSignInRequested>(_onAuthGoogleSignInRequested);
+    on<AuthLoginRequested>(_onAuthLoginRequested);
+    on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
   }
 
   Future<void> _onAuthCheckRequested(
@@ -91,7 +93,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(Unauthenticated());
   }
 
- Future<void> _onAuthGoogleSignInRequested(
+  Future<void> _onAuthGoogleSignInRequested(
     AuthGoogleSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
@@ -99,13 +101,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await GoogleSignIn().signOut();
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      
+
       if (googleUser == null) {
         emit(Unauthenticated());
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -137,7 +140,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             'height': 0,
             'courtPosition': '',
             'coverImageURL': 'https://via.placeholder.com/600x200',
-            'profileImageURL': googleUser.photoUrl ?? 'https://via.placeholder.com/150',
+            'profileImageURL':
+                googleUser.photoUrl ?? 'https://via.placeholder.com/150',
             'postsCount': 0,
             'friendsCount': 0,
             'matchesCount': 0,
@@ -148,6 +152,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     } catch (e) {
       emit(AuthFailure('Failed to sign in with Google: $e'));
+    }
+  }
+
+  Future<void> _onAuthLoginRequested(
+    AuthLoginRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      UserCredential userCredential = await _firebaseAuth
+          .signInWithEmailAndPassword(
+            email: event.email,
+            password: event.password,
+          );
+      User? user = userCredential.user;
+
+      if (user != null) {
+        if (user.emailVerified) {
+          emit(Authenticated(user.uid));
+        } else {
+          emit(AuthFailure('Please verify your email first.'));
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      emit(AuthFailure(e.message ?? 'Błąd logowania'));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
+    }
+  }
+
+  Future<void> _onAuthPasswordResetRequested(
+    AuthPasswordResetRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: event.email);
+    } on FirebaseAuthException catch (e) {
+      emit(AuthFailure(e.message ?? 'Błąd resetowania hasła'));
+    } catch (e) {
+      emit(AuthFailure(e.toString()));
     }
   }
 }
