@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:gap/gap.dart';
+import '../widgets/auth_button.dart';
+import 'login_screen.dart';
+import 'signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -8,36 +13,84 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  'VolleyballConnect',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 32.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                    letterSpacing: 0.5,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Column(
+                        children: [
+                          Gap(80.h),
+                          SvgPicture.asset(
+                            'assets/icons/welcome_logo.svg',
+                            height: 160.h,
+                            fit: BoxFit.contain,
+                          ),
+                          Gap(24.h),
+                          Text(
+                            'VolleyballConnect',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 26.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                          Gap(12.h),
+                          Text(
+                            'Join the ultimate volleyball community where players and fans come together to inspire and be inspired, compete, and share their love for the game.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              height: 1.4,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      Column(
+                        children: <Widget>[
+                          AuthButton(
+                            text: 'LOGIN',
+                            type: AuthButtonType.secondary,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                              );
+                            },
+                          ),
+                          Gap(16.h),
+                          AuthButton(
+                            text: 'SIGN UP',
+                            type: AuthButtonType.primary,
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const SignupScreen()),
+                              );
+                            },
+                          ),
+                          Gap(12.h),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 16.h),
-                Text(
-                  'Join the ultimate volleyball community where players and fans come together to inspire and be inspired, compete, and share their love for the game.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    height: 1.5,
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
