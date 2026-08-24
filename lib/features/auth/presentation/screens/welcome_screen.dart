@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/auth_button.dart';
-import 'login_screen.dart';
-import 'signup_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -66,21 +65,13 @@ class WelcomeScreen extends StatelessWidget {
                           AuthButton(
                             text: 'LOGIN',
                             type: AuthButtonType.secondary,
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const LoginScreen()),
-                              );
-                            },
+                            onPressed: () => context.go('/login'),
                           ),
                           Gap(16.h),
                           AuthButton(
                             text: 'SIGN UP',
                             type: AuthButtonType.primary,
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: (_) => const SignupScreen()),
-                              );
-                            },
+                            onPressed: () => context.go('/signup'),
                           ),
                           Gap(12.h),
                         ],

@@ -19,6 +19,14 @@ enum Routes {
   final String path;
 }
 
+// Stream z Firebase w Listenable dla GoRoutera
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    stream.listen((_) => notifyListeners());
+  }
+}
+
 class AppRoute {
   static final GoRouter router = GoRouter(
     routes: [
@@ -26,39 +34,33 @@ class AppRoute {
         path: Routes.root.path,
         name: Routes.root.name,
         pageBuilder: (BuildContext context, GoRouterState state) =>
-            const NoTransitionPage(
-          child: WelcomeScreen(),
-        ),
+            const NoTransitionPage(child: WelcomeScreen()),
       ),
       GoRoute(
         path: Routes.login.path,
         name: Routes.login.name,
         pageBuilder: (BuildContext context, GoRouterState state) =>
-            const NoTransitionPage(
-          child: LoginScreen(),
-        ),
+            const NoTransitionPage(child: LoginScreen()),
       ),
       GoRoute(
         path: Routes.signup.path,
         name: Routes.signup.name,
         pageBuilder: (BuildContext context, GoRouterState state) =>
-            const NoTransitionPage(
-          child: SignupScreen(),
-        ),
+            NoTransitionPage(child: SignupScreen()),
       ),
       GoRoute(
         path: Routes.home.path,
         name: Routes.home.name,
         pageBuilder: (BuildContext context, GoRouterState state) =>
-            const NoTransitionPage(
-          child: HomeScreen(),
-        ),
+            const NoTransitionPage(child: HomeScreen()),
       ),
     ],
     initialLocation: Routes.root.path,
     routerNeglect: true,
     debugLogDiagnostics: kDebugMode,
-    redirect: (BuildContext context, GoRouterState state) async {
+    // Kluczowa zmiana: router odświeża się automatycznie, gdy zmieni się stan auth w Firebase
+    refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+    redirect: (BuildContext context, GoRouterState state) {
       final bool isWelcomePage = state.matchedLocation == Routes.root.path;
       final bool isLoginPage = state.matchedLocation == Routes.login.path;
       final bool isSignupPage = state.matchedLocation == Routes.signup.path;
@@ -66,17 +68,17 @@ class AppRoute {
       final User? user = FirebaseAuth.instance.currentUser;
       final bool isLoggedIn = user != null;
 
-      // Jeśli użytkownik jest zalogowany, a próbuje wejść na Welcome, Login lub Signup -> przekieruj na Home
+      // Jeśli user jest zalogowany, a próbuje wejść na ekrany autoryzacji -> wyślij na home
       if (isLoggedIn && (isWelcomePage || isLoginPage || isSignupPage)) {
         return Routes.home.path;
       }
 
-      // Jeśli użytkownik NIE jest zalogowany, a próbuje wejść na Home -> przekieruj na Welcome/Login
+      // Jeśli user NIE jest zalogowany, a próbuje wejść na home -> wyślij na welcome
       if (!isLoggedIn && state.matchedLocation == Routes.home.path) {
         return Routes.root.path;
       }
 
-      return null; // Brak przekierowania
+      return null;
     },
   );
 
