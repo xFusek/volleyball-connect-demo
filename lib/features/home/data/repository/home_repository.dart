@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
+import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import '../models/user_model.dart';
 
@@ -114,5 +115,46 @@ class HomeRepository {
       createdAt: DateTime.now(),
       isLiked: false,
     );
+  }
+
+  Stream<List<CommentModel>> getCommentsStream(String postId) {
+    return _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => CommentModel.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  Future<void> addComment({
+    required String postId,
+    required String content,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final postRef = _firestore.collection('posts').doc(postId);
+    final commentsRef = postRef.collection('comments');
+
+    return _firestore.runTransaction((transaction) async {
+      final postSnapshot = await transaction.get(postRef);
+      if (!postSnapshot.exists) {
+        throw Exception('Post does not exist!');
+      }
+
+      final newCommentDoc = commentsRef.doc();
+      transaction.set(newCommentDoc, {
+        'userId': user.uid,
+        'content': content.trim(),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      transaction.update(postRef, {'comments': FieldValue.increment(1)});
+    });
   }
 }

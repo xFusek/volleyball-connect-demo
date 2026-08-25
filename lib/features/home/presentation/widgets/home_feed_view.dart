@@ -117,15 +117,18 @@ class _HomeFeedViewState extends State<HomeFeedView> {
             ),
             SizedBox(width: 12.w),
             Expanded(
-              child: TextField(
-                controller: _postTextController,
-                focusNode: _focusNode,
-                enabled: !isPosting,
-                decoration: const InputDecoration(
-                  hintText: 'Write something...',
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                  isDense: true,
+              child: Padding(
+                padding: EdgeInsets.only(right: 8.w),
+                child: TextField(
+                  controller: _postTextController,
+                  focusNode: _focusNode,
+                  enabled: !isPosting,
+                  decoration: const InputDecoration(
+                    hintText: 'Write something...',
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
+                    isDense: true,
+                  ),
                 ),
               ),
             ),

@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../data/models/post_model.dart';
+import '../../data/repository/home_repository.dart';
+import 'comments_modal.dart';
 
 class PostCard extends StatelessWidget {
   final PostModel post;
@@ -22,58 +24,7 @@ class PostCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FutureBuilder<DocumentSnapshot>(
-            future: FirebaseFirestore.instance
-                .collection('users')
-                .doc(post.authorId)
-                .get(),
-            builder: (context, snapshot) {
-              final userData = snapshot.data?.data() as Map<String, dynamic>?;
-              final name = userData?['name'] ?? 'Volleyball Player';
-              final handle = userData?['handle'] ?? '@player';
-              final String? avatar = userData?['image'];
-              final bool hasValidAvatar =
-                  avatar != null && avatar.startsWith('http');
-
-              return ListTile(
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 12.w,
-                  vertical: 4.h,
-                ),
-                leading: CircleAvatar(
-                  radius: 20.r,
-                  backgroundColor: Colors.grey.shade200,
-                  backgroundImage: hasValidAvatar ? NetworkImage(avatar) : null,
-                  onBackgroundImageError: (_, _) {},
-                  child: !hasValidAvatar
-                      ? Icon(
-                          Icons.person,
-                          color: Colors.grey.shade600,
-                          size: 22.sp,
-                        )
-                      : null,
-                ),
-                title: Text(
-                  name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.sp,
-                  ),
-                ),
-                subtitle: Text(
-                  handle,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 13.sp,
-                  ),
-                ),
-                trailing: IconButton(
-                  icon: Icon(Icons.more_vert, size: 20.sp),
-                  onPressed: () {},
-                ),
-              );
-            },
-          ),
+          _PostAuthorHeader(authorId: post.authorId),
           if (post.content.isNotEmpty)
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
@@ -83,76 +34,177 @@ class PostCard extends StatelessWidget {
               ),
             ),
           if (post.postImage != null && post.postImage!.isNotEmpty)
-            Padding(
-              padding: EdgeInsets.only(top: 8.h),
-              child: AspectRatio(
-                aspectRatio: 4 / 3,
-                child: Image.network(
-                  post.postImage!,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, progress) {
-                    if (progress == null) return child;
-                    return Container(
-                      color: Colors.grey.shade200,
-                      child: const Center(child: CircularProgressIndicator()),
-                    );
-                  },
-                  errorBuilder: (_, _, _) => Container(
-                    color: Colors.grey.shade200,
-                    child: Icon(
-                      Icons.broken_image,
-                      size: 32.sp,
-                      color: Colors.grey,
+            _PostImage(imageUrl: post.postImage!),
+          _PostActionsBar(post: post),
+        ],
+      ),
+    );
+  }
+}
+
+class _PostAuthorHeader extends StatelessWidget {
+  final String authorId;
+
+  const _PostAuthorHeader({required this.authorId});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('users')
+          .doc(authorId)
+          .get(),
+      builder: (context, snapshot) {
+        final userData = snapshot.data?.data() as Map<String, dynamic>?;
+        final name = userData?['name'] ?? 'Volleyball Player';
+        final handle = userData?['handle'] ?? '@player';
+        final String? avatar = userData?['image'];
+        final bool hasValidAvatar =
+            avatar != null && avatar.isNotEmpty && avatar.startsWith('http');
+
+        return Padding(
+          padding: EdgeInsets.fromLTRB(12.w, 10.h, 4.w, 6.h),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20.r,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: hasValidAvatar ? NetworkImage(avatar) : null,
+                child: !hasValidAvatar
+                    ? Icon(
+                        Icons.person,
+                        color: Colors.grey.shade600,
+                        size: 22.sp,
+                      )
+                    : null,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15.sp,
+                      ),
                     ),
-                  ),
+                    Text(
+                      handle,
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13.sp,
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              IconButton(
+                icon: Icon(Icons.more_vert, size: 20.sp),
+                onPressed: () {},
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PostImage extends StatelessWidget {
+  final String imageUrl;
+
+  const _PostImage({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(top: 8.h),
+      child: AspectRatio(
+        aspectRatio: 4 / 3,
+        child: Image.network(
+          imageUrl,
+          width: double.infinity,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return Container(
+              color: Colors.grey.shade200,
+              child: const Center(child: CircularProgressIndicator()),
+            );
+          },
+          errorBuilder: (_, _, _) => Container(
+            color: Colors.grey.shade200,
+            child: Icon(Icons.broken_image, size: 32.sp, color: Colors.grey),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PostActionsBar extends StatelessWidget {
+  final PostModel post;
+
+  const _PostActionsBar({required this.post});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      child: Row(
+        children: [
+          _ActionButton(
+            icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+            iconColor: post.isLiked
+                ? const Color(0xFFC84E4E)
+                : Colors.grey.shade700,
+            count: post.likes,
+            onTap: () =>
+                context.read<HomeBloc>().add(HomePostLikeToggled(post.id)),
+          ),
+          SizedBox(width: 8.w),
+          _ActionButton(
+            icon: Icons.chat_bubble_outline,
+            iconColor: Colors.grey.shade700,
+            count: post.comments,
+            onTap: () => CommentsModal.show(
+              context,
+              postId: post.id,
+              repository: HomeRepository(),
             ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-            child: Row(
-              children: [
-                _buildActionIcon(
-                  icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
-                  iconColor: post.isLiked
-                      ? const Color(0xFFC84E4E)
-                      : Colors.grey.shade700,
-                  count: post.likes,
-                  onTap: () => context.read<HomeBloc>().add(
-                    HomePostLikeToggled(post.id),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                _buildActionIcon(
-                  icon: Icons.chat_bubble_outline,
-                  iconColor: Colors.grey.shade700,
-                  count: post.comments,
-                  onTap: () {},
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: Icon(
-                    Icons.share_outlined,
-                    size: 22.sp,
-                    color: Colors.grey.shade700,
-                  ),
-                  onPressed: () {},
-                ),
-              ],
+          ),
+          const Spacer(),
+          IconButton(
+            icon: Icon(
+              Icons.share_outlined,
+              size: 22.sp,
+              color: Colors.grey.shade700,
             ),
+            onPressed: () {},
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildActionIcon({
-    required IconData icon,
-    required Color iconColor,
-    required int count,
-    required VoidCallback onTap,
-  }) {
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final Color iconColor;
+  final int count;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.iconColor,
+    required this.count,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(20.r),
       onTap: onTap,
