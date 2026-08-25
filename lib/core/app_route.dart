@@ -7,13 +7,14 @@ import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../features/notifications/presentation/screens/notifications_screen.dart';
 
 enum Routes {
   root("/"),
   login("/login"),
   signup("/signup"),
   home("/home"),
-  ;
+  notifications("/notifications");
 
   const Routes(this.path);
   final String path;
@@ -54,17 +55,24 @@ class AppRoute {
         pageBuilder: (BuildContext context, GoRouterState state) =>
             const NoTransitionPage(child: HomeScreen()),
       ),
+      GoRoute(
+        path: Routes.notifications.path,
+        name: Routes.notifications.name,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
     ],
     initialLocation: Routes.root.path,
     routerNeglect: true,
     debugLogDiagnostics: kDebugMode,
     // Kluczowa zmiana: router odświeża się automatycznie, gdy zmieni się stan auth w Firebase
-    refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+    refreshListenable: GoRouterRefreshStream(
+      FirebaseAuth.instance.authStateChanges(),
+    ),
     redirect: (BuildContext context, GoRouterState state) {
       final bool isWelcomePage = state.matchedLocation == Routes.root.path;
       final bool isLoginPage = state.matchedLocation == Routes.login.path;
       final bool isSignupPage = state.matchedLocation == Routes.signup.path;
-      
+
       final User? user = FirebaseAuth.instance.currentUser;
       final bool isLoggedIn = user != null;
 
