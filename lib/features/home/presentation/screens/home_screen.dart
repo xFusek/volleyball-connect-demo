@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
 import '../widgets/home_feed_view.dart';
+import '../widgets/keep_alive_wrapper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen>
                     _buildBadgeIconButton(
                       icon: Icons.notifications_outlined,
                       badgeCount: '99+',
-                      onTap: () {},
+                      onTap: () => context.push('/notifications'),
                     ),
                     _buildBadgeIconButton(
                       icon: Icons.send_outlined,
@@ -131,10 +133,18 @@ class _HomeScreenState extends State<HomeScreen>
               body: TabBarView(
                 controller: _tabController,
                 children: [
-                  HomeFeedView(currentUserAvatar: userAvatarUrl),
-                  const Center(child: Text('Friends Tab')),
-                  const Center(child: Text('Matches Tab')),
-                  const Center(child: Text('Settings Tab')),
+                  KeepAliveWrapper(
+                    child: HomeFeedView(currentUserAvatar: userAvatarUrl),
+                  ),
+                  const KeepAliveWrapper(
+                    child: Center(child: Text('Friends Tab')),
+                  ),
+                  const KeepAliveWrapper(
+                    child: Center(child: Text('Matches Tab')),
+                  ),
+                  const KeepAliveWrapper(
+                    child: Center(child: Text('Settings Tab')),
+                  ),
                 ],
               ),
             ),
