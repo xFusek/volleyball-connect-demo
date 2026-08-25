@@ -7,6 +7,8 @@ import '../../features/auth/presentation/screens/welcome_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
+import '../features/matches/data/models/match_model.dart';
+import '../features/matches/presentation/screens/match_details_screen.dart';
 import '../features/notifications/presentation/screens/notifications_screen.dart';
 
 enum Routes {
@@ -14,7 +16,8 @@ enum Routes {
   login("/login"),
   signup("/signup"),
   home("/home"),
-  notifications("/notifications");
+  notifications("/notifications"),
+  matchDetails("/match-details");
 
   const Routes(this.path);
   final String path;
@@ -59,6 +62,14 @@ class AppRoute {
         path: Routes.notifications.path,
         name: Routes.notifications.name,
         builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: Routes.matchDetails.path,
+        name: Routes.matchDetails.name,
+        pageBuilder: (context, state) {
+          final match = state.extra as MatchModel;
+          return NoTransitionPage(child: MatchDetailsScreen(match: match));
+        },
       ),
     ],
     initialLocation: Routes.root.path,

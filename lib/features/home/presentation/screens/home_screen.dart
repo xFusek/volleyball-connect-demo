@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../matches/presentation/widgets/matches_view.dart';
 import '../../bloc/home_bloc.dart';
 import '../../bloc/home_event.dart';
 import '../../bloc/home_state.dart';
@@ -139,9 +140,7 @@ class _HomeScreenState extends State<HomeScreen>
                   const KeepAliveWrapper(
                     child: Center(child: Text('Friends Tab')),
                   ),
-                  const KeepAliveWrapper(
-                    child: Center(child: Text('Matches Tab')),
-                  ),
+                  KeepAliveWrapper(child: MatchesView()),
                   const KeepAliveWrapper(
                     child: Center(child: Text('Settings Tab')),
                   ),
