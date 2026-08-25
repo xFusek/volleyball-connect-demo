@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'core/app_route.dart';
 import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/bloc/auth_event.dart';
+import 'features/home/bloc/home_bloc.dart';
+import 'features/home/data/repository/home_repository.dart';
 
 class VolleyballConnect extends StatelessWidget {
   const VolleyballConnect({super.key});
@@ -19,6 +21,9 @@ class VolleyballConnect extends StatelessWidget {
           providers: [
             BlocProvider<AuthBloc>(
               create: (context) => AuthBloc()..add(AuthCheckRequested()),
+            ),
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(HomeRepository()),
             ),
           ],
           child: MaterialApp.router(
