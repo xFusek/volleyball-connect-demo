@@ -22,17 +22,61 @@ class HomeRepository {
       id: user.uid,
       name: data['name'] ?? 'Unknown',
       handle: data['handle'] ?? '@unknown',
-      avatarUrl: data['image'] ?? 'https://picsum.photos/200/300?random=5',
+      avatarUrl: data['image'] ?? '',
     );
   }
 
   Future<List<PostModel>> fetchPosts() async {
+    final currentUserId = _auth.currentUser?.uid;
+
     final snapshot = await _firestore
         .collection('posts')
         .orderBy('createdAt', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) => PostModel.fromFirestore(doc)).toList();
+    final posts = await Future.wait(
+      snapshot.docs.map((doc) async {
+        bool isLiked = false;
+        if (currentUserId != null) {
+          final likeDoc = await _firestore
+              .collection('posts')
+              .doc(doc.id)
+              .collection('likes')
+              .doc(currentUserId)
+              .get();
+          isLiked = likeDoc.exists;
+        }
+        return PostModel.fromFirestore(doc, isLiked: isLiked);
+      }),
+    );
+
+    return posts;
+  }
+
+  Future<void> toggleLike(String postId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('User not authenticated');
+
+    final postRef = _firestore.collection('posts').doc(postId);
+    final userLikeRef = postRef.collection('likes').doc(user.uid);
+
+    return _firestore.runTransaction((transaction) async {
+      final postSnapshot = await transaction.get(postRef);
+      if (!postSnapshot.exists) throw Exception("Post does not exist!");
+
+      final userLikeSnapshot = await transaction.get(userLikeRef);
+
+      if (userLikeSnapshot.exists) {
+        transaction.delete(userLikeRef);
+        transaction.update(postRef, {'likes': FieldValue.increment(-1)});
+      } else {
+        transaction.set(userLikeRef, {
+          'uid': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        transaction.update(postRef, {'likes': FieldValue.increment(1)});
+      }
+    });
   }
 
   Future<PostModel> createPost({
@@ -57,7 +101,7 @@ class HomeRepository {
       'createdAt': FieldValue.serverTimestamp(),
       'likes': 0,
       'comments': 0,
-      'postImage': imageUrl.isNotEmpty ? imageUrl : '',
+      'postImage': imageUrl,
     });
 
     return PostModel(
@@ -68,20 +112,7 @@ class HomeRepository {
       likes: 0,
       comments: 0,
       createdAt: DateTime.now(),
-    );
-  }
-
-  Future<UserModel> fetchUserData(String userId) async {
-    final doc = await _firestore.collection('users').doc(userId).get();
-    final data = doc.data() ?? {};
-
-    return UserModel(
-      id: userId,
-      name: data['name'] ?? 'Unknown',
-      handle: data['handle'] ?? '@unknown',
-      avatarUrl:
-          data['image'] ??
-          'https://firebasestorage.googleapis.com/v0/b/social-appv.appspot.com/o/user_avatar%2Ftemplate.jpg?alt=media&token=2a543c75-eef6-41e6-a1b6-23db552f4099',
+      isLiked: false,
     );
   }
 }

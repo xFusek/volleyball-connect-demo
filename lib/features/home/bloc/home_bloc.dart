@@ -11,12 +11,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<HomeFeedLoadRequested>(_onLoadFeed);
     on<HomePostCreatedRequested>(_onCreatePost);
     on<HomeRefreshFeedRequested>(_onRefreshFeed);
+    on<HomePostLikeToggled>(_onToggleLike);
   }
 
   Future<void> _onLoadUser(
     HomeLoadUserRequested event,
     Emitter<HomeState> emit,
   ) async {
+    if (state.userId != null && state.posts.isNotEmpty) return;
     emit(state.copyWith(isLoadingUser: true, clearError: true));
 
     try {
@@ -44,10 +46,35 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     try {
       final posts = await _repository.fetchPosts();
-
       emit(state.copyWith(isLoadingFeed: false, posts: posts));
     } catch (e) {
       emit(state.copyWith(isLoadingFeed: false, errorMessage: e.toString()));
+    }
+  }
+
+  Future<void> _onToggleLike(
+    HomePostLikeToggled event,
+    Emitter<HomeState> emit,
+  ) async {
+    final updatedPosts = state.posts.map((post) {
+      if (post.id == event.postId) {
+        final willBeLiked = !post.isLiked;
+        return post.copyWith(
+          isLiked: willBeLiked,
+          likes: willBeLiked
+              ? post.likes + 1
+              : (post.likes > 0 ? post.likes - 1 : 0),
+        );
+      }
+      return post;
+    }).toList();
+
+    emit(state.copyWith(posts: updatedPosts));
+
+    try {
+      await _repository.toggleLike(event.postId);
+    } catch (e) {
+      add(HomeFeedLoadRequested());
     }
   }
 
@@ -59,9 +86,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     try {
       await _repository.createPost(content: event.content, imageFile: null);
-
       final posts = await _repository.fetchPosts();
-
       emit(state.copyWith(isPosting: false, posts: posts));
     } catch (e) {
       emit(state.copyWith(isPosting: false, errorMessage: e.toString()));

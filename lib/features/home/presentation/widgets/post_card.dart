@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../bloc/home_bloc.dart';
+import '../../bloc/home_event.dart';
 import '../../data/models/post_model.dart';
 
 class PostCard extends StatelessWidget {
@@ -12,57 +17,74 @@ class PostCard extends StatelessWidget {
     return Card(
       elevation: 0.5,
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.symmetric(vertical: 6.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           FutureBuilder<DocumentSnapshot>(
-            future: FirebaseFirestore.instance.collection('users').doc(post.authorId).get(),
+            future: FirebaseFirestore.instance
+                .collection('users')
+                .doc(post.authorId)
+                .get(),
             builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const ListTile(
-                  title: Text('Loading...'),
-                );
-              }
-
               final userData = snapshot.data?.data() as Map<String, dynamic>?;
-              final name = userData?['name'] ?? 'Unknown User';
-              final handle = userData?['handle'] ?? '@unknown';
-              final avatar = userData?['image'] ?? 'https://firebasestorage.googleapis.com/v0/b/social-appv.appspot.com/o/user_avatar%2Ftemplate.jpg?alt=media&token=2a543c75-eef6-41e6-a1b6-23db552f4099';
+              final name = userData?['name'] ?? 'Volleyball Player';
+              final handle = userData?['handle'] ?? '@player';
+              final String? avatar = userData?['image'];
+              final bool hasValidAvatar =
+                  avatar != null && avatar.startsWith('http');
 
               return ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 4.h,
+                ),
                 leading: CircleAvatar(
-                  backgroundImage: NetworkImage(avatar),
+                  radius: 20.r,
+                  backgroundColor: Colors.grey.shade200,
+                  backgroundImage: hasValidAvatar ? NetworkImage(avatar) : null,
+                  onBackgroundImageError: (_, _) {},
+                  child: !hasValidAvatar
+                      ? Icon(
+                          Icons.person,
+                          color: Colors.grey.shade600,
+                          size: 22.sp,
+                        )
+                      : null,
                 ),
                 title: Text(
                   name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.sp,
+                  ),
                 ),
                 subtitle: Text(
                   handle,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 13.sp,
+                  ),
                 ),
                 trailing: IconButton(
-                  icon: const Icon(Icons.more_vert),
+                  icon: Icon(Icons.more_vert, size: 20.sp),
                   onPressed: () {},
                 ),
               );
             },
           ),
-
           if (post.content.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
               child: Text(
                 post.content,
-                style: const TextStyle(fontSize: 14, height: 1.3),
+                style: TextStyle(fontSize: 14.sp, height: 1.3),
               ),
             ),
-
           if (post.postImage != null && post.postImage!.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+              padding: EdgeInsets.only(top: 8.h),
               child: AspectRatio(
                 aspectRatio: 4 / 3,
                 child: Image.network(
@@ -76,23 +98,47 @@ class PostCard extends StatelessWidget {
                       child: const Center(child: CircularProgressIndicator()),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey.shade200,
-                      child: const Icon(Icons.error),
-                    );
-                  },
+                  errorBuilder: (_, _, _) => Container(
+                    color: Colors.grey.shade200,
+                    child: Icon(
+                      Icons.broken_image,
+                      size: 32.sp,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
               ),
             ),
-
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             child: Row(
               children: [
-                _buildReactionButton(Icons.favorite_border, 'Like', () {}),
-                _buildReactionButton(Icons.chat_bubble_outline, 'Comment', () {}),
-                _buildReactionButton(Icons.shortcut_outlined, 'Share', () {}),
+                _buildActionIcon(
+                  icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+                  iconColor: post.isLiked
+                      ? const Color(0xFFC84E4E)
+                      : Colors.grey.shade700,
+                  count: post.likes,
+                  onTap: () => context.read<HomeBloc>().add(
+                    HomePostLikeToggled(post.id),
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                _buildActionIcon(
+                  icon: Icons.chat_bubble_outline,
+                  iconColor: Colors.grey.shade700,
+                  count: post.comments,
+                  onTap: () {},
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(
+                    Icons.share_outlined,
+                    size: 22.sp,
+                    color: Colors.grey.shade700,
+                  ),
+                  onPressed: () {},
+                ),
               ],
             ),
           ),
@@ -101,30 +147,33 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildReactionButton(IconData icon, String label, VoidCallback onTap) {
-    return Expanded(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(icon, size: 18, color: const Color(0xFFC84E4E)),
-                  const SizedBox(width: 4),
-                  Text(label, style: const TextStyle(fontSize: 12)),
-                ],
+  Widget _buildActionIcon({
+    required IconData icon,
+    required Color iconColor,
+    required int count,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(20.r),
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 22.sp, color: iconColor),
+            if (count > 0) ...[
+              SizedBox(width: 6.w),
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade800,
+                ),
               ),
-            ),
-          ),
+            ],
+          ],
         ),
       ),
     );

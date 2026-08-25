@@ -12,3 +12,9 @@ class HomePostCreatedRequested extends HomeEvent {
 }
 
 class HomeRefreshFeedRequested extends HomeEvent {}
+
+class HomePostLikeToggled extends HomeEvent {
+  final String postId;
+
+  HomePostLikeToggled(this.postId);
+}

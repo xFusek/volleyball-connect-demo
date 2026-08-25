@@ -8,8 +8,9 @@ class PostModel {
   final int likes;
   final int comments;
   final DateTime createdAt;
+  final bool isLiked;
 
-  PostModel({
+  const PostModel({
     required this.id,
     required this.authorId,
     required this.content,
@@ -17,29 +18,48 @@ class PostModel {
     required this.likes,
     required this.comments,
     required this.createdAt,
+    this.isLiked = false,
   });
 
-  factory PostModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
+  factory PostModel.fromFirestore(
+    DocumentSnapshot doc, {
+    bool isLiked = false,
+  }) {
+    final data = doc.data() as Map<String, dynamic>? ?? {};
+
     return PostModel(
       id: doc.id,
       authorId: data['authorId'] ?? '',
       content: data['content'] ?? '',
-      postImage: data['postImage'],
-      likes: data['likes'] ?? 0,
-      comments: data['comments'] ?? 0,
+      postImage: (data['postImage'] as String?)?.isNotEmpty == true
+          ? data['postImage']
+          : null,
+      likes: (data['likes'] as num?)?.toInt() ?? 0,
+      comments: (data['comments'] as num?)?.toInt() ?? 0,
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      isLiked: isLiked,
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'authorId': authorId,
-      'content': content,
-      'postImage': postImage,
-      'likes': likes,
-      'comments': comments,
-      'createdAt': Timestamp.fromDate(createdAt),
-    };
+  PostModel copyWith({
+    String? id,
+    String? authorId,
+    String? content,
+    String? postImage,
+    int? likes,
+    int? comments,
+    DateTime? createdAt,
+    bool? isLiked,
+  }) {
+    return PostModel(
+      id: id ?? this.id,
+      authorId: authorId ?? this.authorId,
+      content: content ?? this.content,
+      postImage: postImage ?? this.postImage,
+      likes: likes ?? this.likes,
+      comments: comments ?? this.comments,
+      createdAt: createdAt ?? this.createdAt,
+      isLiked: isLiked ?? this.isLiked,
+    );
   }
 }
