@@ -45,107 +45,108 @@ class _HomeScreenState extends State<HomeScreen>
         return Scaffold(
           backgroundColor: const Color(0xFFF8F9FA),
           body: SafeArea(
-            bottom: false,
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                SliverAppBar(
-                  backgroundColor: Colors.white,
-                  surfaceTintColor: Colors.transparent,
-                  scrolledUnderElevation: 0,
-                  elevation: 0,
-                  pinned: true,
-                  floating: false,
-                  primary: false,
-                  title: Text(
-                    'VolleyballConnect',
-                    style: TextStyle(
-                      color: brandRed,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.sp,
-                    ),
+            child: Column(
+              children: [
+                Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
                   ),
-                  actions: [
-                    _buildBadgeIconButton(
-                      icon: Icons.notifications_outlined,
-                      badgeCount: '99+',
-                      onTap: () => context.push('/notifications'),
-                    ),
-                    _buildBadgeIconButton(
-                      icon: Icons.send_outlined,
-                      badgeCount: '99+',
-                      onTap: () {},
-                    ),
-                    SizedBox(width: 8.w),
-                  ],
-                ),
-                SliverToBoxAdapter(
-                  child: Container(
-                    color: Colors.white,
-                    height: 96.h,
-                    padding: EdgeInsets.symmetric(vertical: 8.h),
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      children: [
-                        _buildStoryAddButton(userAvatarUrl),
-                        _buildStoryItem(
-                          'https://picsum.photos/200/300?random=1',
-                          borderColor: Colors.orange,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'VolleyballConnect',
+                        style: TextStyle(
+                          color: brandRed,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.sp,
                         ),
-                        _buildStoryItem(
-                          'https://picsum.photos/200/300?random=2',
-                          borderColor: Colors.cyan,
-                        ),
-                        _buildStoryItem(
-                          'https://picsum.photos/200/300?random=3',
-                          borderColor: Colors.orange,
-                        ),
-                        _buildStoryItem(
-                          'https://picsum.photos/200/300?random=4',
-                          borderColor: Colors.amber,
-                        ),
-                        _buildStoryItem(
-                          'https://picsum.photos/200/300?random=5',
-                          borderColor: Colors.blue,
-                        ),
-                      ],
-                    ),
+                      ),
+                      Row(
+                        children: [
+                          _buildBadgeIconButton(
+                            icon: Icons.notifications_outlined,
+                            badgeCount: '99+',
+                            onTap: () => context.push('/notifications'),
+                          ),
+                          _buildBadgeIconButton(
+                            icon: Icons.send_outlined,
+                            badgeCount: '99+',
+                            onTap: () {},
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: _StickyTabBarDelegate(
-                    TabBar(
-                      controller: _tabController,
-                      indicatorColor: brandRed,
-                      indicatorWeight: 3.h,
-                      labelColor: brandRed,
-                      unselectedLabelColor: Colors.grey,
-                      tabs: [
-                        Tab(icon: Icon(Icons.home, size: 28.sp)),
-                        Tab(icon: Icon(Icons.people_outline, size: 28.sp)),
-                        Tab(icon: Icon(Icons.sports_volleyball, size: 28.sp)),
-                        Tab(icon: Icon(Icons.menu, size: 28.sp)),
-                      ],
-                    ),
+                Container(
+                  color: Colors.white,
+                  height: 96.h,
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    children: [
+                      _buildStoryAddButton(userAvatarUrl),
+                      _buildStoryItem(
+                        'https://picsum.photos/200/300?random=1',
+                        borderColor: Colors.orange,
+                      ),
+                      _buildStoryItem(
+                        'https://picsum.photos/200/300?random=2',
+                        borderColor: Colors.cyan,
+                      ),
+                      _buildStoryItem(
+                        'https://picsum.photos/200/300?random=3',
+                        borderColor: Colors.orange,
+                      ),
+                      _buildStoryItem(
+                        'https://picsum.photos/200/300?random=4',
+                        borderColor: Colors.amber,
+                      ),
+                      _buildStoryItem(
+                        'https://picsum.photos/200/300?random=5',
+                        borderColor: Colors.blue,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  color: Colors.white,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: brandRed,
+                    indicatorWeight: 3.h,
+                    labelColor: brandRed,
+                    unselectedLabelColor: Colors.grey,
+                    tabs: [
+                      Tab(icon: Icon(Icons.home, size: 28.sp)),
+                      Tab(icon: Icon(Icons.people_outline, size: 28.sp)),
+                      Tab(icon: Icon(Icons.sports_volleyball, size: 28.sp)),
+                      Tab(icon: Icon(Icons.menu, size: 28.sp)),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      KeepAliveWrapper(
+                        child: HomeFeedView(currentUserAvatar: userAvatarUrl),
+                      ),
+                      const KeepAliveWrapper(
+                        child: Center(child: Text('Friends Tab')),
+                      ),
+                      const KeepAliveWrapper(child: MatchesView()),
+                      const KeepAliveWrapper(
+                        child: Center(child: Text('Settings Tab')),
+                      ),
+                    ],
                   ),
                 ),
               ],
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  KeepAliveWrapper(
-                    child: HomeFeedView(currentUserAvatar: userAvatarUrl),
-                  ),
-                  const KeepAliveWrapper(
-                    child: Center(child: Text('Friends Tab')),
-                  ),
-                  KeepAliveWrapper(child: MatchesView()),
-                  const KeepAliveWrapper(
-                    child: Center(child: Text('Settings Tab')),
-                  ),
-                ],
-              ),
             ),
           ),
         );
@@ -233,28 +234,4 @@ class _HomeScreenState extends State<HomeScreen>
       ),
     );
   }
-}
-
-class _StickyTabBarDelegate extends SliverPersistentHeaderDelegate {
-  final TabBar tabBar;
-
-  _StickyTabBarDelegate(this.tabBar);
-
-  @override
-  double get minExtent => tabBar.preferredSize.height;
-
-  @override
-  double get maxExtent => tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(color: Colors.white, child: tabBar);
-  }
-
-  @override
-  bool shouldRebuild(_StickyTabBarDelegate oldDelegate) => false;
 }

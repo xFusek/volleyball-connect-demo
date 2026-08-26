@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import '../../data/models/match_model.dart';
 
 class MatchCard extends StatelessWidget {
   final MatchModel match;
-  final VoidCallback? onCheckPressed;
+  final VoidCallback? onPressed;
 
-  const MatchCard({
-    super.key,
-    required this.match,
-    this.onCheckPressed,
-  });
+  const MatchCard({super.key, required this.match, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -40,17 +37,42 @@ class MatchCard extends StatelessWidget {
                         width: 90.w,
                         height: 120.h,
                         color: Colors.grey.shade100,
-                        child: match.customImageUrl != null && match.customImageUrl!.isNotEmpty
-                            ? Image.network(match.customImageUrl!, fit: BoxFit.cover)
-                            : Image.asset(
-                                'assets/icons/homepage/matches/gleboka31.jpg',
+                        child:
+                            match.customImageUrl != null &&
+                                match.customImageUrl!.isNotEmpty
+                            ? Image.network(
+                                match.customImageUrl!,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, _, _) => Icon(
-                                  Icons.sports_volleyball,
-                                  size: 36.sp,
-                                  color: Colors.grey.shade400,
+                                errorBuilder: (_, _, _) => Container(
+                                  color: Colors.grey.shade200,
+                                  child: Icon(
+                                    Icons.sports_volleyball,
+                                    size: 32.sp,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
+                              )
+                            : (kLocationImages.containsKey(match.location)
+                                  ? Image.asset(
+                                      kLocationImages[match.location]!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, _, _) => Container(
+                                        color: Colors.grey.shade200,
+                                        child: Icon(
+                                          Icons.sports_volleyball,
+                                          size: 32.sp,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    )
+                                  : Container(
+                                      color: Colors.grey.shade200,
+                                      child: Icon(
+                                        Icons.sports_volleyball,
+                                        size: 32.sp,
+                                        color: Colors.grey,
+                                      ),
+                                    )),
                       ),
                     ),
                     SizedBox(width: 12.w),
@@ -74,12 +96,19 @@ class MatchCard extends StatelessWidget {
                           SizedBox(height: 4.h),
                           Row(
                             children: [
-                              Icon(Icons.location_on, color: Colors.grey.shade600, size: 16.sp),
+                              Icon(
+                                Icons.location_on,
+                                color: Colors.grey.shade600,
+                                size: 16.sp,
+                              ),
                               SizedBox(width: 4.w),
                               Expanded(
                                 child: Text(
                                   match.location,
-                                  style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.grey.shade600,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -91,22 +120,39 @@ class MatchCard extends StatelessWidget {
                             Wrap(
                               spacing: 6.w,
                               runSpacing: 4.h,
-                              children: match.tags.map((tag) => Container(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1AAFD8),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: Text(
-                                  tag,
-                                  style: TextStyle(fontSize: 10.sp, color: Colors.white, fontWeight: FontWeight.w600),
-                                ),
-                              )).toList(),
+                              children: match.tags
+                                  .map(
+                                    (tag) => Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w,
+                                        vertical: 3.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF1AAFD8),
+                                        borderRadius: BorderRadius.circular(
+                                          12.r,
+                                        ),
+                                      ),
+                                      child: Text(
+                                        tag,
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
                             ),
                           SizedBox(height: 8.h),
                           Text(
                             match.description,
-                            style: TextStyle(fontSize: 12.sp, color: Colors.black87, height: 1.25),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.black87,
+                              height: 1.25,
+                            ),
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -120,14 +166,22 @@ class MatchCard extends StatelessWidget {
                   width: double.infinity,
                   height: 38.h,
                   child: ElevatedButton(
-                    onPressed: onCheckPressed,
+                    onPressed: () => context.push('/match-details/${match.id}'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: brandRed,
                       foregroundColor: Colors.white,
                       elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
                     ),
-                    child: Text('Check', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Check',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ],
