@@ -84,6 +84,7 @@ class _HomeFeedViewState extends State<HomeFeedView> {
         return RefreshIndicator(
           onRefresh: () async {
             context.read<HomeBloc>().add(HomeRefreshFeedRequested());
+            await Future.delayed(const Duration(milliseconds: 800));
           },
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),

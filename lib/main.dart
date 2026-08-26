@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -20,7 +19,7 @@ void main() async {
     );
 
     // Tymczasowe wymuszenie wylogowania do testów
-    await FirebaseAuth.instance.signOut();
+    // await FirebaseAuth.instance.signOut();
 
     runApp(const VolleyballConnect());
   }, (error, stackTrace) {

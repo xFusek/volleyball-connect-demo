@@ -6,6 +6,9 @@ import 'features/auth/bloc/auth_bloc.dart';
 import 'features/auth/bloc/auth_event.dart';
 import 'features/home/bloc/home_bloc.dart';
 import 'features/home/data/repository/home_repository.dart';
+import 'features/matches/bloc/matches_bloc.dart';
+import 'features/matches/bloc/matches_event.dart';
+import 'features/matches/data/repository/matches_repository.dart';
 
 class VolleyballConnect extends StatelessWidget {
   const VolleyballConnect({super.key});
@@ -24,6 +27,11 @@ class VolleyballConnect extends StatelessWidget {
             ),
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(HomeRepository()),
+            ),
+            BlocProvider<MatchesBloc>(
+              create: (context) =>
+                  MatchesBloc(MatchesRepository())
+                    ..add(MatchesSubscriptionRequested()),
             ),
           ],
           child: MaterialApp.router(
