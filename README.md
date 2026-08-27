@@ -17,12 +17,12 @@ A portfolio demo showcasing a BLoC refactor of a legacy Flutter and Firebase pro
 
 ## 📱 App Demo
 
-### Feed & Interactions
-<div align="center">
-  <img src="assets/images/presentation/feed_demo.gif" alt="Feed Demo" width="280">
-</div>
-
 ### Matches & Navigation
 <div align="center">
   <img src="assets/images/presentation/matches_demo.gif" alt="Matches Demo" width="280">
+</div>
+
+### Feed & Interactions
+<div align="center">
+  <img src="assets/images/presentation/feed_demo.gif" alt="Feed Demo" width="280">
 </div>
