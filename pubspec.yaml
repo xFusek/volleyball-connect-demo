@@ -76,9 +76,9 @@ flutter:
     - assets/icons/welcome_logo.svg
     - assets/icons/textWithlogo.svg
     - assets/icons/google_icon.svg
-    - assets/icons/matches/gleboka31.jpg
-    - assets/icons/matches/aleja_jana_dlugosza.jpg
-    - assets/icons/matches/konstantynow.jpg
+    - assets/images/matches/gleboka31.jpg
+    - assets/images/matches/aleja_jana_dlugosza.jpg
+    - assets/images/matches/konstantynow.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

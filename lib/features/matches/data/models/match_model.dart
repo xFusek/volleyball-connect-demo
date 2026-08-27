@@ -2,11 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 const Map<String, String> kLocationImages = {
   'ulica Ignacego Rzeckiego 10, Lublin':
-      'assets/icons/matches/gleboka31.jpg',
+      'assets/images/matches/gleboka31.jpg',
   'Aleja Jana Długosza 8a, Lublin':
-      'assets/icons/matches/aleja_jana_dlugosza.jpg',
+      'assets/images/matches/aleja_jana_dlugosza.jpg',
   'ulica Doktora Kazimierza Jaczewskiego 5, Lublin':
-      'assets/icons/matches/konstantynow.jpg',
+      'assets/images/matches/konstantynow.jpg',
 };
 
 class MatchModel {
